@@ -78,7 +78,7 @@ def build_rag_chain(vectorstore: Chroma):
     llm = ChatOpenAI(
         model="qwen-flash",  # 模型的代号
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-        api_key="sk-7381c6b4f6a34135885cae55171da91b"
+        api_key="sk-xx
     )
 
     prompt = ChatPromptTemplate.from_messages([
