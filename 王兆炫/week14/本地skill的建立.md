@@ -24,3 +24,11 @@ C:\Users\lenovo\.cursor\skills\my-skill>echo #name "This is my first skill" > SK
 
 > 后面发现其实可以在cursor settings中直接创建, 并且可以直接选择作用域, 很方便, 那就直接在这里建立了
 
+<img width="1111" height="689" alt="image" src="https://github.com/user-attachments/assets/42889048-6782-4634-976e-5d5ec8cece66" />
+
+直接在settings页面发起创建即可，会自动在项目中创建SKILLS文件夹
+
+而后就可以找到对应的skills
+<img width="527" height="125" alt="image" src="https://github.com/user-attachments/assets/3eb00100-ad35-45f2-a34d-69be5283d6db" />
+
+详见对应的`stock-volatility-visualization.md`文件, 注意实际使用时需要放在 `.cursor/skills/` 目录下
