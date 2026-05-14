@@ -1,0 +1,118 @@
+from pathlib import Path
+import os
+
+from langchain_community.document_loaders import DirectoryLoader, TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_openai import ChatOpenAI
+from langchain.chains import RetrievalQA
+
+BASE_DIR = Path(__file__).resolve().parent
+KNOWLEDGE_BASE_DIR = BASE_DIR / "knowledge_base"
+CHROMA_DB_DIR = BASE_DIR / "chroma_db"
+EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+OPENAI_MODEL = "gpt-3.5-turbo"
+
+
+def load_documents(doc_path: Path = KNOWLEDGE_BASE_DIR):
+    loader = DirectoryLoader(
+        str(doc_path),
+        glob="**/*.txt",
+        loader_cls=TextLoader,
+        loader_kwargs={"encoding": "utf-8"},
+    )
+    documents = loader.load()
+    print(f"加载了 {len(documents)} 个文档")
+    return documents
+
+
+def split_documents(documents, chunk_size=500, chunk_overlap=50):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n\n", "\n", "。", "！", "？", "；", "，", " ", ""],
+    )
+    chunks = splitter.split_documents(documents)
+    print(f"分割为 {len(chunks)} 个文本块")
+    return chunks
+
+
+def create_embeddings():
+    return HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
+    )
+
+
+def create_vectorstore(chunks, persist_dir: Path = CHROMA_DB_DIR):
+    vectorstore = Chroma.from_documents(
+        documents=chunks,
+        embedding=create_embeddings(),
+        persist_directory=str(persist_dir),
+    )
+    vectorstore.persist()
+    print(f"向量库已创建并保存到 {persist_dir}")
+    return vectorstore
+
+
+def load_vectorstore(persist_dir: Path = CHROMA_DB_DIR):
+    vectorstore = Chroma(
+        persist_directory=str(persist_dir),
+        embedding_function=create_embeddings(),
+    )
+    print(f"已加载向量库 {persist_dir}")
+    return vectorstore
+
+
+def get_or_create_vectorstore():
+    if CHROMA_DB_DIR.exists():
+        return load_vectorstore()
+
+    documents = load_documents()
+    chunks = split_documents(documents)
+    return create_vectorstore(chunks)
+
+
+def create_qa_chain(vectorstore, llm_model: str = OPENAI_MODEL):
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("请先设置环境变量 OPENAI_API_KEY")
+
+    llm = ChatOpenAI(
+        model_name=llm_model,
+        temperature=0.3,
+        openai_api_key=openai_api_key,
+    )
+
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+    return RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=retriever,
+        return_source_documents=True,
+        verbose=True,
+    )
+
+
+def main():
+    if not KNOWLEDGE_BASE_DIR.exists():
+        raise FileNotFoundError(f"知识库目录不存在: {KNOWLEDGE_BASE_DIR}")
+
+    qa_chain = create_qa_chain(get_or_create_vectorstore())
+
+    while True:
+        question = input("\n请输入问题（输入 quit 退出）: ").strip()
+        if question.lower() == "quit":
+            break
+        if not question:
+            continue
+
+        result = qa_chain({"query": question})
+        print(f"\n回答: {result['result']}")
+        print(f"\n引用文档: {[doc.metadata.get('source') for doc in result['source_documents']]}")
+
+
+if __name__ == "__main__":
+    main()
