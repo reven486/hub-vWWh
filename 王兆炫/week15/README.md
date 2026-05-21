@@ -4,6 +4,8 @@
     写清楚需求
     写测试逻辑
     cc 逐步完成，架构 和 初步代码完成即可。
+    该项作业已在本地使用cursor+cc协作完成, 完成后已将项目推送到github, 地址见[multimodal-rag](https://github.com/Birchove/multimodal-rag-api)
 
 作业2，阅读mineru 论文和 mineru 的使用； 尝试进行文档解析，对比下mineru和 pdfplumber的效果差异，文字回答。
     https://mineru.net/OpenSourceTools/Extractor
+
