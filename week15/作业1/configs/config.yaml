@@ -1,0 +1,41 @@
+app:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+
+llm:
+  model: "qwen-plus"
+  api_key: "${DASHSCOPE_API_KEY}"
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  max_tokens: 2048
+  temperature: 0.7
+
+models:
+  bge:
+    model_name: "BAAI/bge-large-zh-v1.5"
+    device: "cpu"
+  clip:
+    model_name: "openai/clip-vit-base-patch32"
+    device: "cpu"
+
+mineru:
+  base_url: "http://localhost:8888"
+  timeout: 300
+  parse_endpoint: "/api/v1/extract"
+
+sqlite:
+  db_path: "app/doc/metadata.db"
+
+milvus:
+  host: "localhost"
+  port: 19530
+  text_collection: "text_chunks"
+  image_collection: "image_chunks"
+  text_dim: 1024
+  image_dim: 512
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  parse_topic: "document_parse"
+  consumer_group: "parse_workers"
+  auto_offset_reset: "earliest"
