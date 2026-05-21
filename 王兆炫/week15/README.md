@@ -7,6 +7,6 @@
     该项作业已在本地使用cursor+cc协作完成, 完成后已将项目推送到github, 地址见[multimodal-rag](https://github.com/Birchove/multimodal-rag-api)
 
 作业2，阅读mineru 论文和 mineru 的使用； 尝试进行文档解析，对比下mineru和 pdfplumber的效果差异，文字回答。
-    + 论文地址: https://mineru.net/OpenSourceTools/Extractor
-    + 对比分析: https://github.com/Birchove/ai_learning/blob/main/%E7%8E%8B%E5%85%86%E7%82%AB/week15/Mineru_vs_pdfplumber.md
++ 论文地址: https://mineru.net/OpenSourceTools/Extractor
++ 对比分析: https://github.com/Birchove/ai_learning/blob/main/%E7%8E%8B%E5%85%86%E7%82%AB/week15/Mineru_vs_pdfplumber.md
 
