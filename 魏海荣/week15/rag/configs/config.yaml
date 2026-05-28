@@ -1,0 +1,33 @@
+app:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+
+models:
+  llm:
+    model_name: "qwen-plus"
+    api_base: "https://api.openai.com/v1"
+    api_key: "${OPENAI_API_KEY}"
+  clip:
+    model_name: "openai/clip-vit-base-patch32"
+  bge:
+    model_name: "BAAI/bge-large-zh"
+
+mineru:
+  base_url: "http://localhost:8001"
+  timeout: 300
+
+database:
+  sqlite:
+    path: "data/metadata.db"
+
+milvus:
+  host: "localhost"
+  port: 19530
+  collection_text: "text_chunks"
+  collection_image: "image_chunks"
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topic_parse: "document_parse"
+  consumer_group: "document_parser"
