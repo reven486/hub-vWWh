@@ -1,0 +1,155 @@
+import pdfplumber
+import re
+import os
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from typing import List, Dict
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+def parse_pdf_with_pdfplumber(pdf_path):
+    """解析PDF并提取带元数据的文本"""
+    full_text = []
+    pages_metadata = []
+    with pdfplumber.open(pdf_path) as pdf:
+        for page_num, page in enumerate(pdf.pages, 1):
+            # 提取文本
+            text = page.extract_text()
+            # 保存每页的元数据
+            pages_metadata.append({
+                'page_num': page_num,
+                'text': text,
+                'chars': len(text) if text else 0
+            })
+            full_text.append(text)
+    return '\n'.join(full_text), pages_metadata
+
+def smart_chunking(pages_metadata: List[Dict]) -> List[Dict]:
+    """只能文本切块"""
+    chunks = []
+    for page in pages_metadata:
+        text = page['text']
+        page_num = page['page_num']
+        # 使用递归切分器，保持语义边界
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=200,  # 每个块100字符
+            chunk_overlap=20,  # 重叠50字符，避免上下文断裂
+            separators=["\n\n", "\n", "。", "！", "？", "；", " ", ""],
+            length_function=len
+        )
+        para_chunks = text_splitter.split_text(text)
+
+        # 为每个块添加元数据
+        for idx, chunk_text in enumerate(para_chunks):
+            chunks.append(
+                {
+                    'text': chunk_text,
+                    'metadata': {
+                        'source': page.get('source', 'unknown'),
+                        'page_num': page_num,
+                        'chunk_id': f'page_{page_num}_chunk_{idx}',
+                        'char_count': len(chunk_text)
+                    }
+
+                }
+            )
+    return chunks
+
+# 向量化存储（建立索引）
+from sentence_transformers import SentenceTransformer
+import chromadb
+from chromadb.utils import embedding_functions
+
+# 初始化向量模型
+model = SentenceTransformer("/Users/lookupthesky/.cache/modelscope/hub/models/google-bert/bert-base-chinese")
+# 初始化向量数据库
+chroma_client = chromadb.Client()
+collections = chroma_client.create_collection(
+    name="pdf_documents",
+    embedding_function=embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name="/Users/lookupthesky/.cache/modelscope/hub/models/google-bert/bert-base-chinese"
+    )
+)
+
+def index_documents(chunks: List[Dict]):
+    """"将文本向量化并存入数据库"""
+    for idx, chunk in enumerate(chunks):
+        collections.add(
+            documents=[chunk['text']],
+            metadatas=[chunk['metadata']],
+            ids=[f"doc_{idx}"]
+        )
+
+# 用户提问匹配
+def retrieve_relevant_chunks(query: str, top_k: int = 5) -> List[Dict]:
+    """用户提问匹配相关内容"""
+    # 1.问题向量化
+    query_embedding = model.encode(query)
+
+    # 2.相似度检索
+    results = collections.query(
+        query_embeddings=query_embedding,
+        n_results=top_k,
+        include=["documents", "metadatas", "distances"]
+    )
+    # 3.返回最相关的内容块
+    relevant_chunks = []
+    for doc, meta, distance in zip(
+        results['documents'][0],
+        results['metadatas'][0],
+        results['distances'][0]
+    ):
+        relevance_score = 1 - distance  # 距离转相似度
+        relevant_chunks.append({
+            'text':doc,
+            'metadata': meta,
+            'relevance_score': relevance_score
+        })
+    return relevant_chunks
+
+from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+# RAG问答实现
+class PDFRAGSystem:
+    def __init__(self, pdf_path):
+        # 解析PDF
+        _, pages_metadata = parse_pdf_with_pdfplumber(pdf_path)
+
+        # 文本切换
+        self.chunks = smart_chunking(pages_metadata)
+
+        # 建立索引
+        index_documents(self.chunks)
+
+
+
+
+    def answer_question(self, question: str) -> str:
+        # 1.检索相关内容
+        relevant_chunks = retrieve_relevant_chunks(question, top_k=3)
+
+        # 2.构建prompt
+
+        context = "\n\n".join([chunk['text'] for chunk in relevant_chunks])
+
+        prompt = f"""基于以下文档内容回答问题：
+
+        文档内容：
+        {context}
+
+        问题：{question}
+
+        请基于文档内容给出准确、简洁的回答。如果文档中没有相关信息，请明确说明。"""
+        model = ChatOpenAI(
+            model="qwen-flash",  # 模型的代号
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            api_key="****"
+        )
+        agent = create_agent(
+            model=model,
+            system_prompt="You are a RAG assistant"
+        )
+        response = agent.invoke({"messages": [{"role": "user", "content": prompt}]})
+        return response["messages"][-1].content
+
+rag_system = PDFRAGSystem("汽车知识手册.pdf")
+print(rag_system.chunks[0]['text'])
+answer = rag_system.answer_question("如何打开尾门")
+print(answer)

@@ -1,0 +1,59 @@
+2026-05-14 18:45:33.630 | INFO     | config.logging:setup_logging:83 | 📝 日志系统初始化完成 - 级别: INFO, 文件: logs/app.log
+2026-05-14 18:45:34.704 | INFO     | __main__:initialize_rag:207 | ==================================================
+2026-05-14 18:45:34.704 | INFO     | __main__:initialize_rag:208 | RAG 系统初始化...
+2026-05-14 18:45:34.704 | INFO     | __main__:initialize_rag:209 | ==================================================
+2026-05-14 18:45:34.704 | INFO     | __main__:initialize_rag:212 | 加载文档: ./docs
+2026-05-14 18:45:34.704 | INFO     | loaders:load_directory:132 | 开始扫描目录: ./docs, 递归: True
+2026-05-14 18:45:34.705 | INFO     | loaders:load_directory:167 | 📂 目录加载完成: 共加载 0 个文档块
+2026-05-14 18:45:34.705 | WARNING  | __main__:initialize_rag:216 | 未加载到任何文档，使用示例数据
+2026-05-14 18:45:34.705 | INFO     | __main__:initialize_rag:222 | 文档加载完成: 4 个文档块
+2026-05-14 18:45:34.705 | INFO     | __main__:initialize_rag:233 | 文本分割完成: 4 个文本块
+2026-05-14 18:45:34.705 | INFO     | embadding:get_embeddings:45 | 🔢 创建 Embedding 模型: /Users/haironwei/Desktop/simpleCode/task/第6周：RAG工程化实现/models/BAAI/bge-small-zh-v1.5
+2026-05-14 18:45:34.823 | INFO     | __main__:initialize_rag:237 | Embedding 模型加载完成
+2026-05-14 18:45:34.823 | INFO     | __main__:initialize_rag:243 | 创建新的向量库: chroma
+2026-05-14 18:45:34.823 | INFO     | vectorstore:create_vector_store:84 | 🗄️  创建向量存储: type=chroma, documents=4
+2026-05-14 18:45:35.189 | INFO     | vectorstore:create_vector_store:100 | ✅ Chroma 向量库创建成功
+2026-05-14 18:45:35.191 | INFO     | __main__:initialize_rag:262 | 检索器创建完成
+2026-05-14 18:45:35.191 | INFO     | __main__:get_llm:61 | 初始化 LLM: model=qwen-flash
+2026-05-14 18:45:35.436 | INFO     | __main__:initialize_rag:266 | RAG Chain 创建完成（Rerank 已启用）
+2026-05-14 18:45:35.436 | INFO     | __main__:initialize_rag:268 | ==================================================
+2026-05-14 18:45:35.437 | INFO     | __main__:initialize_rag:269 | RAG 系统初始化完成！
+2026-05-14 18:45:35.437 | INFO     | __main__:initialize_rag:270 | ==================================================
+2026-05-14 18:53:36.342 | INFO     | config.logging:setup_logging:83 | 📝 日志系统初始化完成 - 级别: INFO, 文件: logs/app.log
+2026-05-14 18:53:37.340 | INFO     | __main__:initialize_rag:208 | ==================================================
+2026-05-14 18:53:37.340 | INFO     | __main__:initialize_rag:209 | RAG 系统初始化...
+2026-05-14 18:53:37.340 | INFO     | __main__:initialize_rag:210 | ==================================================
+2026-05-14 18:53:37.340 | INFO     | __main__:initialize_rag:213 | 加载文档: ./docs
+2026-05-14 18:53:37.340 | INFO     | loaders:load_directory:132 | 开始扫描目录: ./docs, 递归: True
+2026-05-14 18:53:37.340 | INFO     | loaders:load_directory:167 | 📂 目录加载完成: 共加载 0 个文档块
+2026-05-14 18:53:37.340 | WARNING  | __main__:initialize_rag:217 | 未加载到任何文档，使用示例数据
+2026-05-14 18:53:37.340 | INFO     | __main__:initialize_rag:223 | 文档加载完成: 4 个文档块
+2026-05-14 18:53:37.341 | INFO     | __main__:initialize_rag:234 | 文本分割完成: 4 个文本块
+2026-05-14 18:53:37.341 | INFO     | embadding:get_embeddings:45 | 🔢 创建 Embedding 模型: /Users/haironwei/Desktop/simpleCode/task/第6周：RAG工程化实现/models/BAAI/bge-small-zh-v1.5
+2026-05-14 18:53:37.468 | INFO     | __main__:initialize_rag:238 | Embedding 模型加载完成
+2026-05-14 18:53:37.468 | INFO     | __main__:initialize_rag:251 | 加载已有向量库: chroma
+2026-05-14 18:53:37.468 | INFO     | vectorstore:load_vector_store:165 | 📂 加载向量库: data/chroma_db
+2026-05-14 18:53:37.546 | INFO     | vectorstore:load_vector_store:180 | ✅ Chroma 向量库加载成功
+2026-05-14 18:53:37.546 | INFO     | __main__:initialize_rag:263 | 检索器创建完成
+2026-05-14 18:57:18.750 | INFO     | config.logging:setup_logging:83 | 📝 日志系统初始化完成 - 级别: INFO, 文件: logs/app.log
+2026-05-14 18:57:19.723 | INFO     | __main__:initialize_rag:208 | ==================================================
+2026-05-14 18:57:19.723 | INFO     | __main__:initialize_rag:209 | RAG 系统初始化...
+2026-05-14 18:57:19.723 | INFO     | __main__:initialize_rag:210 | ==================================================
+2026-05-14 18:57:19.723 | INFO     | __main__:initialize_rag:213 | 加载文档: ./docs
+2026-05-14 18:57:19.724 | INFO     | loaders:load_directory:132 | 开始扫描目录: ./docs, 递归: True
+2026-05-14 18:57:19.724 | INFO     | loaders:load_directory:167 | 📂 目录加载完成: 共加载 0 个文档块
+2026-05-14 18:57:19.724 | WARNING  | __main__:initialize_rag:217 | 未加载到任何文档，使用示例数据
+2026-05-14 18:57:19.724 | INFO     | __main__:initialize_rag:223 | 文档加载完成: 4 个文档块
+2026-05-14 18:57:19.724 | INFO     | __main__:initialize_rag:234 | 文本分割完成: 4 个文本块
+2026-05-14 18:57:19.724 | INFO     | embadding:get_embeddings:45 | 🔢 创建 Embedding 模型: /Users/haironwei/Desktop/simpleCode/task/第6周：RAG工程化实现/models/BAAI/bge-small-zh-v1.5
+2026-05-14 18:57:19.818 | INFO     | __main__:initialize_rag:238 | Embedding 模型加载完成
+2026-05-14 18:57:19.818 | INFO     | __main__:initialize_rag:251 | 加载已有向量库: chroma
+2026-05-14 18:57:19.818 | INFO     | vectorstore:load_vector_store:165 | 📂 加载向量库: data/chroma_db
+2026-05-14 18:57:19.899 | INFO     | vectorstore:load_vector_store:180 | ✅ Chroma 向量库加载成功
+2026-05-14 18:57:19.899 | INFO     | __main__:initialize_rag:263 | 检索器创建完成
+2026-05-14 18:57:19.899 | INFO     | __main__:get_llm:61 | 初始化 LLM: model=qwen-flash
+2026-05-14 18:57:20.035 | INFO     | __main__:initialize_rag:267 | RAG Chain 创建完成（Rerank 已启用）
+2026-05-14 18:57:20.036 | INFO     | __main__:initialize_rag:269 | ==================================================
+2026-05-14 18:57:20.036 | INFO     | __main__:initialize_rag:270 | RAG 系统初始化完成！
+2026-05-14 18:57:20.036 | INFO     | __main__:initialize_rag:271 | ==================================================
+2026-05-14 18:57:20.160 | INFO     | __main__:get_reranker:83 | 初始化 Reranker: model=/Users/haironwei/Desktop/simpleCode/task/第6周：RAG工程化实现/models/BAAI/bge-reranker-base
