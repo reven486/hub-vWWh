@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 狼人杀观战台</title>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --panel: rgba(18, 22, 31, 0.86);
+      --panel-strong: rgba(28, 34, 47, 0.95);
+      --line: rgba(197, 168, 114, 0.24);
+      --text: #f2eadb;
+      --muted: #a9a08f;
+      --gold: #c5a872;
+      --crimson: #9f3f40;
+      --emerald: #3d7f63;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top, rgba(197, 168, 114, 0.12), transparent 38%),
+        linear-gradient(180deg, #11151e 0%, #0a0c10 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .grain::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 3px 3px, 5px 5px;
+      mix-blend-mode: soft-light;
+    }
+
+    .shell {
+      width: min(1240px, calc(100vw - 32px));
+      margin: 24px auto;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 320px 1fr;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero {
+      grid-column: 1 / -1;
+      padding: 26px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -80px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(197,168,114,.20), transparent 68%);
+    }
+
+    .eyebrow {
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 4vw, 56px);
+      font-weight: 700;
+      line-height: 1.02;
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .sidebar, .main { display: grid; gap: 18px; }
+    .section { padding: 22px; }
+    .section h2 {
+      margin: 0 0 14px 0;
+      font-size: 14px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .controls { display: grid; gap: 12px; }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform .18s ease, opacity .18s ease, background .18s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button.primary {
+      background: linear-gradient(135deg, #d0b17b, #8f6f43);
+      color: #17120b;
+      font-weight: 700;
+    }
+    button.secondary {
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .meta {
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      margin: 0 8px 8px 0;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: var(--panel-strong);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+    .stat-value {
+      margin-top: 8px;
+      font-size: 26px;
+      color: var(--text);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      max-height: 560px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .event {
+      border-left: 2px solid rgba(197,168,114,.45);
+      padding: 12px 14px 12px 16px;
+      background: rgba(255,255,255,.03);
+      border-radius: 0 14px 14px 0;
+    }
+
+    .event-type {
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .event-body {
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .alive { color: var(--emerald); }
+    .dead { color: var(--crimson); }
+
+    @media (max-width: 940px) {
+      .shell { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="grain">
+  <div class="shell">
+    <section class="card hero">
+      <div class="eyebrow">AI Werewolf · Spectator Console</div>
+      <h1>狼人彼此伪装，观众只见真相的表面。</h1>
+      <div class="subtitle">
+        这是一个为多智能体狼人杀设计的轻量观战页面：你可以创建一局纯 AI 对战，驱动整局自动进行，并实时查看公开事件流、存活名单与最终结果；私密信息默认不会暴露。
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <section class="card section">
+        <h2>控制台</h2>
+        <div class="controls">
+          <button id="createBtn" class="primary">创建新对局</button>
+          <button id="stepBtn" class="secondary" disabled>单步推进</button>
+          <button id="runBtn" class="secondary" disabled>自动跑完整局</button>
+          <button id="revealBtn" class="secondary" disabled>赛后查看完整回放</button>
+        </div>
+        <div class="meta" style="margin-top: 16px;">
+          <div>当前对局：<span id="matchId">未创建</span></div>
+          <div>当前阶段：<span id="phase">-</span></div>
+          <div>当前轮次：<span id="turn">-</span></div>
+          <div>最终胜方：<span id="winner">-</span></div>
+        </div>
+      </section>
+
+      <section class="card section">
+        <h2>玩家状态</h2>
+        <div id="players" class="hint">创建对局后显示玩家列表。</div>
+      </section>
+
+      <section class="card section">
+        <h2>说明</h2>
+        <div class="hint">
+          Live 视图只显示 public 事件，不泄露狼人阵营、验人结果和药剂状态。只有对局结束后，才允许切换到 full replay 查看完整事件。
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <section class="card section">
+        <h2>局势面板</h2>
+        <div class="status-grid">
+          <div class="stat">
+            <div class="stat-label">公开事件数</div>
+            <div class="stat-value" id="eventCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">仍存活玩家</div>
+            <div class="stat-value" id="aliveCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">已淘汰玩家</div>
+            <div class="stat-value" id="deadCount">0</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section">
+        <h2><span id="timelineTitle">公开事件流</span></h2>
+        <div id="timeline" class="timeline">
+          <div class="hint">创建并运行一局之后，这里会按时间显示公开事件。</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = { matchId: null, players: [], events: [], winner: null, phase: null, turn: null, revealFull: false };
+
+    const createBtn = document.getElementById('createBtn');
+    const stepBtn = document.getElementById('stepBtn');
+    const runBtn = document.getElementById('runBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const matchIdEl = document.getElementById('matchId');
+    const phaseEl = document.getElementById('phase');
+    const turnEl = document.getElementById('turn');
+    const winnerEl = document.getElementById('winner');
+    const playersEl = document.getElementById('players');
+    const timelineEl = document.getElementById('timeline');
+    const timelineTitleEl = document.getElementById('timelineTitle');
+    const eventCountEl = document.getElementById('eventCount');
+    const aliveCountEl = document.getElementById('aliveCount');
+    const deadCountEl = document.getElementById('deadCount');
+
+    const phaseLabels = {
+      night_werewolf: '狼人行动',
+      night_seer: '预言家行动',
+      night_witch: '女巫行动',
+      day_announcement: '白天公布',
+      day_discussion: '白天讨论',
+      day_vote: '白天投票',
+      finished: '对局结束'
+    };
+
+    function formatPhase(phase) {
+      return phaseLabels[phase] || phase || '-';
+    }
+
+    function renderPlayers() {
+      if (!state.players.length) {
+        playersEl.innerHTML = '<div class="hint">创建对局后显示玩家列表。</div>';
+        return;
+      }
+      const deadSet = new Set();
+      for (const event of state.events) {
+        if (event.event_type === 'player.eliminated' && event.target_player_id) {
+          deadSet.add(event.target_player_id);
+        }
+      }
+      playersEl.innerHTML = state.players.map(player => {
+        const dead = deadSet.has(player.player_id);
+        return `<div class="pill ${dead ? 'dead' : 'alive'}">${player.player_id} · 座位 ${player.seat} · ${dead ? '已淘汰' : '存活'}</div>`;
+      }).join('');
+      aliveCountEl.textContent = String(state.players.length - deadSet.size);
+      deadCountEl.textContent = String(deadSet.size);
+    }
+
+    function eventText(event) {
+      if (event.event_type === 'match.created') return `对局已创建，玩家数：${event.payload.players.length}`;
+      if (event.event_type === 'phase.started') return `进入阶段：${formatPhase(event.phase)}`;
+      if (event.event_type === 'player.spoke') return `${event.actor_player_id} 发言：${event.payload.content}`;
+      if (event.event_type === 'player.eliminated') return `${event.target_player_id} 出局，原因：${event.payload.reason}`;
+      if (event.event_type === 'match.finished') return `对局结束，胜方：${event.payload.winner}`;
+      if (event.event_type === 'agent.action_returned') return `${event.actor_player_id} 执行动作：${event.payload.action_type}`;
+      if (event.event_type === 'action.rejected') return `${event.actor_player_id} 动作被拒绝：${event.payload.reason}`;
+      return JSON.stringify(event.payload);
+    }
+
+    function renderTimeline() {
+      timelineTitleEl.textContent = state.revealFull ? '完整回放' : '公开事件流';
+      eventCountEl.textContent = String(state.events.length);
+      if (!state.events.length) {
+        timelineEl.innerHTML = '<div class="hint">暂无事件。</div>';
+        return;
+      }
+      timelineEl.innerHTML = state.events.map(event => `
+        <article class="event">
+          <div class="event-type">${event.event_type}</div>
+          <div class="event-body">${eventText(event)}</div>
+        </article>
+      `).join('');
+    }
+
+    function syncHeader() {
+      matchIdEl.textContent = state.matchId || '未创建';
+      phaseEl.textContent = formatPhase(state.phase);
+      turnEl.textContent = state.turn == null ? '-' : String(state.turn);
+      winnerEl.textContent = state.winner || '-';
+      const finished = state.phase === 'finished';
+      stepBtn.disabled = !state.matchId || finished;
+      runBtn.disabled = !state.matchId || finished;
+      revealBtn.disabled = !finished;
+      revealBtn.textContent = state.revealFull ? '切回公开视图' : '赛后查看完整回放';
+    }
+
+    async function fetchReplay() {
+      if (!state.matchId) return;
+      const path = state.revealFull ? `/replay/${state.matchId}/full` : `/replay/${state.matchId}`;
+      const resp = await fetch(path);
+      const data = await resp.json();
+      state.events = data.events;
+      renderPlayers();
+      renderTimeline();
+    }
+
+    async function refreshMatch() {
+      if (!state.matchId) return;
+      const resp = await fetch(`/matches/${state.matchId}`);
+      const data = await resp.json();
+      state.phase = data.phase;
+      state.turn = data.turn;
+      state.winner = data.winner;
+      syncHeader();
+      await fetchReplay();
+    }
+
+    createBtn.addEventListener('click', async () => {
+      createBtn.disabled = true;
+      try {
+        const resp = await fetch('/matches', { method: 'POST' });
+        const data = await resp.json();
+        state.matchId = data.match_id;
+        state.players = data.players;
+        state.phase = data.phase;
+        state.turn = 1;
+        state.winner = null;
+        state.events = [];
+        state.revealFull = false;
+        syncHeader();
+        renderPlayers();
+        renderTimeline();
+        await fetchReplay();
+      } finally {
+        createBtn.disabled = false;
+      }
+    });
+
+    stepBtn.addEventListener('click', async () => {
+      if (!state.matchId) return;
+      stepBtn.disabled = true;
+      runBtn.disabled = true;
+      try {
+        const resp = await fetch(`/matches/${state.matchId}/step`, { method: 'POST' });
+        const data = await resp.json();
+        state.phase = data.phase;
+        state.turn = data.turn;
+        state.winner = data.winner;
+        syncHeader();
+        await fetchReplay();
+      } finally {
+        syncHeader();
+      }
+    });
+
+    runBtn.addEventListener('click', async () => {
+      if (!state.matchId) return;
+      stepBtn.disabled = true;
+      runBtn.disabled = true;
+      try {
+        const resp = await fetch(`/matches/${state.matchId}/run`, { method: 'POST' });
+        const data = await resp.json();
+        state.phase = data.phase;
+        state.turn = data.turn;
+        state.winner = data.winner;
+        syncHeader();
+        await fetchReplay();
+      } finally {
+        syncHeader();
+      }
+    });
+
+    revealBtn.addEventListener('click', async () => {
+      if (state.phase !== 'finished') return;
+      state.revealFull = !state.revealFull;
+      syncHeader();
+      await fetchReplay();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+app:
+  host: 0.0.0.0
+  port: 8016
+  debug: false
+
+llm:
+  model: qwen-max
+  api_key: ${DASHSCOPE_API_KEY}
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  max_tokens: 800
+  temperature: 0.7
+
+game:
+  max_turns: 12
+  default_setup: standard_7
+  data_dir: data/matches
+
+sqlite:
+  db_path: data/werewolf.db
